@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS "tbl_pub_fund_position_details" (
+    "DATETIME"	TEXT,
+    "FINANCIAL TYPE" TEXT,
+    "SYMBOL" TEXT,
+    "SECURITY NAME" TEXT,
+    "SEDOL" TEXT,
+    "ISIN" TEXT,
+    "PRICE" REAL,
+    "QUANTITY" REAL,
+    "REALISED P/L" REAL,
+    "MARKET VALUE" REAL
+);
