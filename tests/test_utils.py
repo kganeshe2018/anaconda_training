@@ -1,8 +1,9 @@
 from unittest.mock import patch, MagicMock
 import pytest
-from app.config import Config
 from helpers.utils import (_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd, _extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
+from app.etl.publish_data import PublishData
+
 import polars as pl
 
 @pytest.fixture
@@ -10,6 +11,7 @@ def mock_config():
     config = MagicMock()
     config.DB_PATH = ":memory:"
     config.FUNDS_FOLDER = "tests/data"
+    config.sql_query_get_reference_data = "dummy.sql"
     return config
 
 @pytest.fixture
