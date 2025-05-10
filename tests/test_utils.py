@@ -1,9 +1,24 @@
+from unittest.mock import patch, MagicMock
 import pytest
 from app.config import Config
 from helpers.utils import (_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd, _extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
 import polars as pl
 
+@pytest.fixture
+def mock_config():
+    config = MagicMock()
+    config.DB_PATH = ":memory:"
+    config.FUNDS_FOLDER = "tests/data"
+    return config
+
+@pytest.fixture
+def sample_dataframe():
+    return pl.DataFrame({
+        "DATETIME": ["01/31/2024", "02/29/2024"],
+        "SYMBOL": ["AAPL", "AAPL"],
+        "PRICE": [150.0, 155.0]
+    })
 
 def test_extract_dd_mm_yyyy():
     assert _extract_dd_mm_yyyy("mend-report Wallington.30_11_2022.csv") == "2022-11-30"
@@ -34,8 +49,8 @@ def test_extract_report_date():
     assert extract_report_date("TT_monthly_Trustmind.20220831.csv") == "2022-08-31"
     assert extract_report_date("incorrectFileType.txt") is None
 
-def test_upsample_month_end():
-    preprocessing_model = PreprocessData(Config())
+def test_upsample_month_end(mock_config):
+    preprocessing_model = PreprocessData(app_config=mock_config)
 
     # Input: Original data
     df = pl.DataFrame({
@@ -72,3 +87,40 @@ def test_upsample_month_end():
 
     # 4. Final row count = original rows + missing month-ends (1 added row)
     assert result.shape[0] == 5
+
+@patch("app.etl.pre_process_data.read_file_as_string")
+@patch("app.etl.pre_process_data.execute_query")
+@patch("app.etl.pre_process_data.write_df_to_sqlite")
+def test_preprocess_reference_price_data_fix_date(
+    mock_write,
+    mock_execute,
+    mock_read_file,
+    mock_config,
+    sample_dataframe
+):
+    # Setup mock returns
+    mock_read_file.return_value = "SELECT * FROM equity_price"
+    mock_execute.return_value = sample_dataframe
+
+    # Create instance
+    preprocessor = PreprocessData(app_config=mock_config)
+    preprocessor.reference_data_query_file_name = "dummy.sql"
+
+    # Mock upsample method
+    preprocessor.upsample_month_end = MagicMock(return_value=sample_dataframe.with_columns(
+        pl.col("DATETIME").str.strptime(pl.Date, "%m/%d/%Y").cast(pl.Date)
+    ))
+
+    # Run method
+    preprocessor.preprocess_reference_price_data_fix_date()
+
+    # Assertions
+    mock_read_file.assert_called_once_with("dummy.sql")
+    mock_execute.assert_called_once()
+    mock_write.assert_called_once()
+
+    # Check if DATETIME was converted to YYYY-MM-DD format
+    written_df = mock_write.call_args[0][1]  # second arg is the DataFrame
+    assert "DATETIME" in written_df.columns
+    assert written_df["DATETIME"].dtype == pl.Utf8
+    assert all(len(str(date)) == 10 for date in written_df["DATETIME"])  # YYYY-MM-DD
