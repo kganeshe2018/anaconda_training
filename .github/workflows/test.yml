@@ -27,5 +27,5 @@ jobs:
       - name: Install dependencies with Poetry
         run: poetry install
 
-      - name: Run tests with coverage
+      - name: Run tests with coverage (Testing)
         run: PYTHONPATH=src poetry run pytest --cov=app --cov-report=term-missing
