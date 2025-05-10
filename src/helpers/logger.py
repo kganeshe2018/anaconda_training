@@ -2,8 +2,30 @@ import logging
 from pathlib import Path
 
 class LoggerFactory:
+    """
+    Factory class for creating and configuring loggers.
+    
+    This class provides a centralized way to create logger instances with consistent
+    formatting and output handling.
+    """
+    
     @staticmethod
     def get_logger(name: str, log_file: str = None, level=logging.INFO) -> logging.Logger:
+        """
+        Create or retrieve a configured logger instance.
+        
+        Creates a logger with the specified name and configuration. If the logger already exists,
+        it returns the existing instance. The logger is configured with a console handler and
+        optionally a file handler if log_file is specified.
+        
+        Args:
+            name (str): Name of the logger
+            log_file (str, optional): Path to the log file. If provided, logs will be written to this file.
+            level: Logging level (e.g., logging.INFO, logging.DEBUG). Defaults to logging.INFO.
+            
+        Returns:
+            logging.Logger: Configured logger instance
+        """
         logger = logging.getLogger(name)
         logger.setLevel(level)
 
