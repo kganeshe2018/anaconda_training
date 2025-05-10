@@ -1,0 +1,11 @@
+SELECT main.DATETIME AS DATETIME,
+       MAIN.SYMBOL AS SYMBOL,
+       MAIN.PRICE AS PRICE_REF,
+       LKP."SECURITY NAME" AS "SECURITY NAME",
+       LKP.SECTOR AS "SECTOR",
+       LKP.INDUSTRY AS "INDUSTRY",
+       LKP.CURRENCY AS "CURRENCY"
+       FROM tbl_stg_equity_prices main
+left join equity_reference lkp on
+main.SYMBOL=lkp.SYMBOL
+ORDER BY DATETIME,SYMBOL
