@@ -1,6 +1,7 @@
 from unittest.mock import patch, MagicMock
 from app.etl.generate_perf_report import GeneratePerfReport
 from app.etl.generate_recon_report import GenerateReconReport
+from app.etl.publish_data import PublishData
 from helpers.utils import (extract_mm_dd_yyyy, extract_yyyy_mm_dd, extract_yyyymmdd, extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
 import polars as pl
@@ -151,3 +152,30 @@ def test_export_filtered_joins_to_excel_polars(
     )
     assert joined.filter(pl.col("FUND NAME") == "Alpha")[0, "PRICE_DIFF"] == 2.0
     assert joined.filter(pl.col("FUND NAME") == "Beta")[0, "PRICE_DIFF"] == -2.0
+
+
+@patch.object(PublishData, "publish_reference_data")
+@patch.object(PublishData, "publish_fund_data")
+def test_compute_calls_all_methods(mock_fund, mock_ref, mock_config):
+    publisher = PublishData(mock_config)
+    publisher._compute()
+
+    mock_ref.assert_called_once()
+    mock_fund.assert_called_once()
+
+@patch("app.etl.publish_data.copy_data_from_src_to_tgt")
+def test_publish_fund_data(mock_copy, mock_config):
+    publisher = PublishData(mock_config)
+    publisher.publish_fund_data()
+
+    mock_copy.assert_called_once_with(mock_config, "tbl_stg_fund_position_details", "tbl_pub_fund_position_details")
+
+@patch("app.etl.publish_data.copy_data_from_src_to_tgt")
+def test_publish_reference_data(mock_copy, mock_config):
+    publisher = PublishData(mock_config)
+    publisher.publish_reference_data()
+
+    assert mock_copy.call_count == 2
+    mock_copy.assert_any_call(mock_config, "tbl_stg_equity_prices", "tbl_pub_equity_prices")
+    mock_copy.assert_any_call(mock_config, "tbl_stg_equity_reference", "tbl_stg_equity_reference")
+
