@@ -1,26 +1,12 @@
 from unittest.mock import patch, MagicMock
 import pytest
+
+from app.etl.generate_perf_report import GeneratePerfReport
 from helpers.utils import (_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd, _extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
 from app.etl.publish_data import PublishData
 
 import polars as pl
-
-@pytest.fixture
-def mock_config():
-    config = MagicMock()
-    config.DB_PATH = ":memory:"
-    config.FUNDS_FOLDER = "tests/data"
-    config.sql_query_get_reference_data = "dummy.sql"
-    return config
-
-@pytest.fixture
-def sample_dataframe():
-    return pl.DataFrame({
-        "DATETIME": ["01/31/2024", "02/29/2024"],
-        "SYMBOL": ["AAPL", "AAPL"],
-        "PRICE": [150.0, 155.0]
-    })
 
 def test_extract_dd_mm_yyyy():
     assert _extract_dd_mm_yyyy("mend-report Wallington.30_11_2022.csv") == "2022-11-30"
@@ -98,18 +84,18 @@ def test_preprocess_reference_price_data_fix_date(
     mock_execute,
     mock_read_file,
     mock_config,
-    sample_dataframe
+        sample_reference_df
 ):
     # Setup mock returns
     mock_read_file.return_value = "SELECT * FROM equity_price"
-    mock_execute.return_value = sample_dataframe
+    mock_execute.return_value = sample_reference_df
 
     # Create instance
     preprocessor = PreprocessData(app_config=mock_config)
     preprocessor.reference_data_query_file_name = "dummy.sql"
 
     # Mock upsample method
-    preprocessor.upsample_month_end = MagicMock(return_value=sample_dataframe.with_columns(
+    preprocessor.upsample_month_end = MagicMock(return_value=sample_reference_df.with_columns(
         pl.col("DATETIME").str.strptime(pl.Date, "%m/%d/%Y").cast(pl.Date)
     ))
 
@@ -126,3 +112,44 @@ def test_preprocess_reference_price_data_fix_date(
     assert "DATETIME" in written_df.columns
     assert written_df["DATETIME"].dtype == pl.Utf8
     assert all(len(str(date)) == 10 for date in written_df["DATETIME"])  # YYYY-MM-DD
+#
+# @patch("src.app.etl.generate_perf_report.execute_query")
+# @patch("src.app.etl.generate_perf_report.read_file_as_string")
+# def test_get_funds_data(mock_read_sql, mock_exec_query, mock_config, sample_fund_data):
+#     mock_read_sql.return_value = "SELECT * FROM something WHERE dte='{dte}'"
+#     mock_exec_query.return_value = sample_fund_data
+#
+#     report = GeneratePerfReport(mock_config)
+#     df = report.get_funds_data()
+#
+#     mock_read_sql.assert_called_once_with(file_path="fund.sql")
+#     mock_exec_query.assert_called_once()
+#     assert isinstance(df, pl.DataFrame)
+#     assert df.shape[0] == 4
+#
+@patch("src.app.etl.generate_perf_report.Path.mkdir")
+@patch("src.app.etl.generate_perf_report.execute_query")
+@patch("src.app.etl.generate_perf_report.read_file_as_string")
+@patch("pandas.DataFrame.to_excel")
+def test_generate_best_performing_fund_report(
+    mock_to_excel,
+    mock_read_sql,
+    mock_exec_query,
+    mock_mkdir,
+    mock_config,
+    sample_fund_data
+):
+    mock_read_sql.return_value = "SELECT * FROM something WHERE dte='{dte}'"
+    mock_exec_query.return_value = sample_fund_data
+
+    report = GeneratePerfReport(mock_config)
+    report.generate_best_performing_fund_report()
+
+    assert mock_to_excel.call_count == 2
+
+@patch("src.app.etl.generate_perf_report.GeneratePerfReport.generate_best_performing_fund_report")
+def test_compute_calls_generate_report(mock_generate, mock_config):
+    with patch.object(GeneratePerfReport, "generate_best_performing_fund_report") as mock_generate:
+        report = GeneratePerfReport(mock_config)
+        report._compute()
+        mock_generate.assert_called_once()

@@ -27,7 +27,6 @@ class GeneratePerfReport(BaseModel):
         self.sql_path_active_funds_cfg = Config.SQL_QUERY_GET_ACTIVE_FUNDS_CFG
         self.col_fund_name = "FUND NAME"
 
-    def _compute(self) -> None:
         self.generate_best_performing_fund_report()
 
 
@@ -94,6 +93,5 @@ class GeneratePerfReport(BaseModel):
         ])
 
         # Step 6: Write to Excel
-        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
         best_funds.sort("MONTH").to_pandas().to_excel(output_file, index=False, sheet_name="Best Funds")
         logger.info(f"Performance fund report saved to {output_file}")
