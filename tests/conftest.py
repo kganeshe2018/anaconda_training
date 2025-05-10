@@ -58,3 +58,16 @@ def recon_test_data():
 
     return funds, reference, active_cfg
 
+@pytest.fixture
+def sample_active_funds_df():
+    return pl.DataFrame({
+        "FUND NAME": ["Alpha", "Beta"]
+    })
+
+@pytest.fixture
+def sample_fund_csv(tmp_path):
+    file1 = tmp_path / "Alpha_2023-01-31.csv"
+    file2 = tmp_path / "Beta_2023-01-31.csv"
+    pl.DataFrame({"SYMBOL": ["AAPL"], "PRICE": [150]}).write_csv(file1)
+    pl.DataFrame({"SYMBOL": ["MSFT"], "PRICE": [200]}).write_csv(file2)
+    return tmp_path

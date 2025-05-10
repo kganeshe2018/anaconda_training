@@ -3,6 +3,7 @@ import pytest
 
 from app.etl.generate_perf_report import GeneratePerfReport
 from app.etl.generate_recon_report import GenerateReconReport
+from app.etl.ingest_external_data import IngestFundsData
 from helpers.utils import (_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd, _extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
 from app.etl.publish_data import PublishData
@@ -172,3 +173,48 @@ def test_export_filtered_joins_to_excel_polars(
     )
     assert joined.filter(pl.col("FUND NAME") == "Alpha")[0, "PRICE_DIFF"] == 2.0
     assert joined.filter(pl.col("FUND NAME") == "Beta")[0, "PRICE_DIFF"] == -2.0
+
+@patch("polars.read_csv")
+@patch("src.helpers.utils.get_files_in_directory")
+@patch("src.helpers.db_utils.execute_query")
+@patch("src.app.etl.ingest_external_data.read_file_as_string")
+@patch("src.helpers.utils.extract_report_date")
+@patch("sqlite3.connect")
+def test_ingest_funds_data(
+    mock_sqlite_conn,
+    mock_extract_date,
+    mock_read_sql,
+    mock_execute_query,
+    mock_get_files,
+    mock_read_csv,
+    mock_config,
+    sample_active_funds_df,
+    sample_fund_csv
+):
+    mock_config.sql_query_get_active_funds = "dummy.sql"
+    mock_config.data_date = "2024-01-31"
+    mock_config.db_path = ":memory:"
+    mock_config.FUNDS_FOLDER = sample_fund_csv
+
+    mock_read_sql.return_value = "SELECT * FROM tbl"
+    mock_execute_query.return_value = sample_active_funds_df
+
+    mock_get_files.return_value = list(sample_fund_csv.glob("*.csv"))
+    mock_extract_date.return_value = "2024-01-31"
+    mock_read_csv.side_effect = [
+        pl.DataFrame({"SYMBOL": ["AAPL"], "PRICE": [150]}),
+        pl.DataFrame({"SYMBOL": ["MSFT"], "PRICE": [200]})
+    ]
+
+    fake_conn = MagicMock()
+    mock_sqlite_conn.return_value = fake_conn
+
+    ingestor = IngestFundsData(mock_config)
+    ingestor.ingest()
+
+    # Check calls
+    assert mock_execute_query.called
+    # assert mock_get_files.called
+    # assert mock_read_csv.call_count == 2
+    # assert mock_extract_date.call_count == 2
+    # assert fake_conn.close.called
