@@ -11,7 +11,7 @@ logger = LoggerFactory.get_logger(__name__)
 
 __all__ = ["extract_report_date","get_files_in_directory","read_file_as_string"]
 
-def _extract_dd_mm_yyyy(filename: str) -> Optional[str]:
+def extract_dd_mm_yyyy(filename: str) -> Optional[str]:
     """
     Extract a date from a filename in dd-mm-yyyy format and convert to yyyy-mm-dd.
     
@@ -31,7 +31,7 @@ def _extract_dd_mm_yyyy(filename: str) -> Optional[str]:
     return None
 
 
-def _extract_mm_dd_yyyy(filename: str) -> Optional[str]:
+def extract_mm_dd_yyyy(filename: str) -> Optional[str]:
     """
     Extract a date from a filename in mm-dd-yyyy format and convert to yyyy-mm-dd.
     
@@ -50,7 +50,7 @@ def _extract_mm_dd_yyyy(filename: str) -> Optional[str]:
             return None
     return None
 
-def _extract_yyyy_mm_dd(filename: str) -> Optional[str]:
+def extract_yyyy_mm_dd(filename: str) -> Optional[str]:
     """
     Extract a date from a filename in yyyy-mm-dd format and convert to yyyy-mm-dd.
     
@@ -69,7 +69,7 @@ def _extract_yyyy_mm_dd(filename: str) -> Optional[str]:
             return None
     return None
 
-def _extract_yyyymmdd(filename: str) -> Optional[str]:
+def extract_yyyymmdd(filename: str) -> Optional[str]:
     """
     Extract a date from a filename in yyyymmdd format and convert to yyyy-mm-dd.
     
@@ -103,7 +103,7 @@ def extract_report_date(filename: str) -> Optional[str]:
     Returns:
         Optional[str]: Formatted date as yyyy-mm-dd if found and valid, None otherwise
     """
-    for extractor in [_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd,_extract_dd_mm_yyyy]:
+    for extractor in [extract_mm_dd_yyyy, extract_yyyy_mm_dd, extract_yyyymmdd,extract_dd_mm_yyyy]:
         date = extractor(filename)
         if date:
             return date

@@ -1,37 +1,33 @@
 from unittest.mock import patch, MagicMock
-import pytest
-
 from app.etl.generate_perf_report import GeneratePerfReport
 from app.etl.generate_recon_report import GenerateReconReport
-from app.etl.ingest_external_data import IngestFundsData
-from helpers.utils import (_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd, _extract_dd_mm_yyyy, extract_report_date,)
+from helpers.utils import (extract_mm_dd_yyyy, extract_yyyy_mm_dd, extract_yyyymmdd, extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
-from app.etl.publish_data import PublishData
 
 import polars as pl
 
 def test_extract_dd_mm_yyyy():
-    assert _extract_dd_mm_yyyy("mend-report Wallington.30_11_2022.csv") == "2022-11-30"
-    assert _extract_dd_mm_yyyy("lala.30/11/20221.txt") == "2022-11-30"
-    assert _extract_dd_mm_yyyy("incorrectFileType.txt") is None
+    assert extract_dd_mm_yyyy("mend-report Wallington.30_11_2022.csv") == "2022-11-30"
+    assert extract_dd_mm_yyyy("lala.30/11/20221.txt") == "2022-11-30"
+    assert extract_dd_mm_yyyy("incorrectFileType.txt") is None
 
 
 def test_extract_mm_dd_yyyy():
-    assert _extract_mm_dd_yyyy("Report-of-Gohen.11-30-2022 breakdown.csv") == "2022-11-30"
-    assert _extract_mm_dd_yyyy("lala.12-01-2021.txt") == "2021-12-01"
-    assert _extract_mm_dd_yyyy("incorrectFileType.txt") is None
+    assert extract_mm_dd_yyyy("Report-of-Gohen.11-30-2022 breakdown.csv") == "2022-11-30"
+    assert extract_mm_dd_yyyy("lala.12-01-2021.txt") == "2021-12-01"
+    assert extract_mm_dd_yyyy("incorrectFileType.txt") is None
 
 def test_extract_yyyy_mm_dd():
-    assert _extract_yyyy_mm_dd("Report-of-Gohen.2022-11-30 .csv") == "2022-11-30"
-    assert _extract_yyyy_mm_dd("lala .2022-11-30.csv") == "2022-11-30"
-    assert _extract_yyyy_mm_dd("lala .2022_11_30.csv") == "2022-11-30"
-    assert _extract_yyyy_mm_dd("incorrectFileType.gg") is None
+    assert extract_yyyy_mm_dd("Report-of-Gohen.2022-11-30 .csv") == "2022-11-30"
+    assert extract_yyyy_mm_dd("lala .2022-11-30.csv") == "2022-11-30"
+    assert extract_yyyy_mm_dd("lala .2022_11_30.csv") == "2022-11-30"
+    assert extract_yyyy_mm_dd("incorrectFileType.gg") is None
 
 def test_extract_yyyymmdd():
-    assert _extract_yyyymmdd("TT_monthly_Trustmind.20220831.csv") == "2022-08-31"
-    assert _extract_yyyymmdd("TT_monthly_Trustmind.20220831 - lala.csv") == "2022-08-31"
-    assert _extract_yyyymmdd("backup_20230501.zip") == "2023-05-01"
-    assert _extract_yyyymmdd("incorrectFileType.docx") is None
+    assert extract_yyyymmdd("TT_monthly_Trustmind.20220831.csv") == "2022-08-31"
+    assert extract_yyyymmdd("TT_monthly_Trustmind.20220831 - lala.csv") == "2022-08-31"
+    assert extract_yyyymmdd("backup_20230501.zip") == "2023-05-01"
+    assert extract_yyyymmdd("incorrectFileType.docx") is None
 
 def test_extract_report_date():
     assert extract_report_date("Report-of-Gohen.11-30-2022.csv") == "2022-11-30"

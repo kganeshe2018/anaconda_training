@@ -26,8 +26,8 @@ class SetupDB(BaseModel):
         super().__init__(app_config)
         self.db_path = Config.DB_PATH
         self.funds_folder = Config.FUNDS_FOLDER
-        self.sql_base_table_script_path = Config.BASE_TABLES_SQL_SCRIPT_PATH
-        self.sql_master_reference_script_path = Config.MASTER_REFERENCE_SQL_SCRIPT_PATH
+        self.sql_base_table_script_path = Config.SQL_QUERY_BASE_TABLES
+        self.sql_master_reference_script_path = Config.SQL_QUERY_MASTER_REFERENCE
 
     def _compute(self) -> None:
         """

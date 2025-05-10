@@ -15,9 +15,9 @@ class IngestFundsData(BaseModel):
     def  __init__(self, app_config: Config):
         super().__init__(app_config)
         self.config = app_config
-        self.db_path = Config.DB_PATH
-        self.funds_folder = Config.FUNDS_FOLDER
-        self.tbl_raw = "tbl_raw_fund_position_details"
+        self.db_path = self.config.get_db_path()
+        self.funds_folder = self.config.get_funds_folder()
+
 
     def _compute(self) -> None:
         self.ingest()

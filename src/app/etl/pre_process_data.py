@@ -17,7 +17,7 @@ class PreprocessData(BaseModel):
         self.db_path = Config.DB_PATH
         self.funds_folder = Config.FUNDS_FOLDER
         self.tbl_raw = "tbl_raw_fund_position_details"
-        self.reference_data_query_file_name = self.config.sql_query_get_reference_data
+        self.reference_data_query_file_name = self.config.sql_query_get_raw_reference_data
 
     def _compute(self) -> None:
         self.preprocess_reference_price_data_fix_date()
