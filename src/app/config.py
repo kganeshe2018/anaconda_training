@@ -1,15 +1,11 @@
 from pathlib import Path
 
-from dateutil.utils import today
-
-
 class Config:
     BASE_DIR = Path(__file__).resolve().parent.parent.parent
     DB_PATH = BASE_DIR / "data/db/app_db.sqlite"
     MASTER_REFERENCE_SQL_SCRIPT_PATH = BASE_DIR / "data/reference-data/master-reference-sql.sql"
     BASE_TABLES_SQL_SCRIPT_PATH = BASE_DIR / "data/reference-data/create-table.sql"
     FUNDS_FOLDER = BASE_DIR / "data/ext-funds"
-    SECRET_KEY = "secret"
     SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_PATH}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQL_QUERY_GET_ACTIVE_FUNDS_CFG = BASE_DIR / "data/sql/query_get_active_funds_cfg.sql"
@@ -27,7 +23,6 @@ class Config:
         self.master_reference_sql_script_path = Config.MASTER_REFERENCE_SQL_SCRIPT_PATH
         self.base_tables_sql_script_path = Config.BASE_TABLES_SQL_SCRIPT_PATH
         self.funds_folder = Config.FUNDS_FOLDER
-        self.secret_key = Config.SECRET_KEY
         self.sql_alchemy_database_uri = Config.SQLALCHEMY_DATABASE_URI
         self.sql_alchemy_track_modifications = Config.SQLALCHEMY_TRACK_MODIFICATIONS
         self.sql_query_get_active_funds = Config.SQL_QUERY_GET_ACTIVE_FUNDS_CFG
