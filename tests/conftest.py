@@ -24,8 +24,8 @@ def sample_fund_data():
     return pl.DataFrame({
         "DATETIME": ["2024-01-01", "2024-01-31", "2024-01-15", "2024-01-31"],
         "FUND NAME": ["Alpha", "Alpha", "Beta", "Beta"],
-        "MARKET VALUE": [1000, 1200, 1500, 1600],
-        "REALISED P/L": [50, 75, 100, 125]
+        "MARKET VALUE": [1000, 1200, 1000, 1100],
+        "REALISED P/L": [100, 0, 50, 0]
     })
 
 @pytest.fixture
@@ -35,3 +35,4 @@ def sample_reference_df():
         "SYMBOL": ["AAPL", "AAPL"],
         "PRICE": [150.0, 155.0]
     })
+

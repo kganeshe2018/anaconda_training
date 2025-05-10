@@ -2,7 +2,7 @@ from pathlib import Path
 
 import polars as pl
 import pandas as pd
-from typing import List, Union
+from typing import List, Union, Optional
 from pathlib import Path
 from src.app.config import Config
 from src.base.base_model import BaseModel
@@ -41,19 +41,9 @@ class GeneratePerfReport(BaseModel):
             date_col: str = "DATETIME",
             fund_col: str = "FUND NAME",
             mv_col: str = "MARKET VALUE",
-            pl_col: str = "REALISED P/L"
-    ):
-        """
-        Computes the best performing fund (highest RoR) for each month and exports it to Excel.
-
-        Args:
-            df (pl.DataFrame): Input data with columns for date, fund, market value, and realized P/L.
-            output_file (str): Path to write the Excel file.
-            date_col (str): Date column.
-            fund_col (str): Fund identifier.
-            mv_col (str): Market value column.
-            pl_col (str): Realized P/L column.
-        """
+            pl_col: str = "REALISED P/L",
+            return_df: bool = False  #
+    ) -> Optional[pl.DataFrame]:
         df = self.get_funds_data()
         output_file= self.report_perf_path
 
@@ -95,3 +85,7 @@ class GeneratePerfReport(BaseModel):
         # Step 6: Write to Excel
         best_funds.sort("MONTH").to_pandas().to_excel(output_file, index=False, sheet_name="Best Funds")
         logger.info(f"Performance fund report saved to {output_file}")
+
+        if return_df:
+            return best_funds
+        return None
