@@ -71,7 +71,7 @@ class PreprocessData(BaseModel):
             filled = temp.fill_null(strategy="forward")
 
             # Extract only the newly added month-end rows
-            filtered = filled.filter(pl.col(datetime_col).is_in(scaffold[datetime_col]))
+            filtered = filled.filter(pl.col(datetime_col).is_in(scaffold[datetime_col].implode()))
             generated_rows.append(filtered)
 
         # Combine all results: original + generated
