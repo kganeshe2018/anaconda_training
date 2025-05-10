@@ -36,3 +36,25 @@ def sample_reference_df():
         "PRICE": [150.0, 155.0]
     })
 
+
+@pytest.fixture
+def recon_test_data():
+    funds = pl.DataFrame({
+        "DATETIME": ["2024-01-31", "2024-01-31"],
+        "SYMBOL": ["AAPL", "MSFT"],
+        "FUND NAME": ["Alpha", "Beta"],
+        "PRICE_FUND": [150.0, 200.0]
+    })
+
+    reference = pl.DataFrame({
+        "DATETIME": ["2024-01-31", "2024-01-31"],
+        "SYMBOL": ["AAPL", "MSFT"],
+        "PRICE_REF": [148.0, 202.0]
+    })
+
+    active_cfg = pl.DataFrame({
+        "FUND NAME": ["Alpha", "Beta"]
+    })
+
+    return funds, reference, active_cfg
+

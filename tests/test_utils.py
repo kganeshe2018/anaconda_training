@@ -2,6 +2,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 
 from app.etl.generate_perf_report import GeneratePerfReport
+from app.etl.generate_recon_report import GenerateReconReport
 from helpers.utils import (_extract_mm_dd_yyyy, _extract_yyyy_mm_dd, _extract_yyyymmdd, _extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
 from app.etl.publish_data import PublishData
@@ -136,3 +137,38 @@ def test_compute_calls_generate_report(mock_generate, mock_config):
         report = GeneratePerfReport(mock_config)
         report._compute()
         mock_generate.assert_called_once()
+
+@patch("pandas.DataFrame.to_excel")
+@patch("pandas.ExcelWriter")
+def test_export_filtered_joins_to_excel_polars(
+    mock_excel_writer, mock_to_excel, mock_config, recon_test_data
+):
+    funds_df, ref_df, cfg_df = recon_test_data
+
+    # Setup fake writer for context manager
+    fake_writer = MagicMock()
+    mock_excel_writer.return_value.__enter__.return_value = fake_writer
+
+    mock_config.REPORT_RECON_PATH = "test_outputs/recon_report.xlsx"
+    recon = GenerateReconReport(mock_config)
+
+    recon.get_funds_data = lambda: funds_df
+    recon.get_reference_data = lambda: ref_df
+    recon.get_active_funds_cfg = lambda: cfg_df
+
+    # Run the function
+    recon.export_filtered_joins_to_excel_polars()
+
+    # Check that to_excel was called once per fund
+    sheet_names = [kwargs["sheet_name"] for args, kwargs in mock_to_excel.call_args_list]
+
+    assert "Alpha" in sheet_names
+    assert "Beta" in sheet_names
+    assert len(sheet_names) == 2
+
+    # Check PRICE_DIFF values are correct
+    joined = funds_df.join(ref_df, on=["DATETIME", "SYMBOL"], how="inner").with_columns(
+        (pl.col("PRICE_FUND") - pl.col("PRICE_REF")).alias("PRICE_DIFF")
+    )
+    assert joined.filter(pl.col("FUND NAME") == "Alpha")[0, "PRICE_DIFF"] == 2.0
+    assert joined.filter(pl.col("FUND NAME") == "Beta")[0, "PRICE_DIFF"] == -2.0

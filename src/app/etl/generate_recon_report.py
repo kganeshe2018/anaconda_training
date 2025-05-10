@@ -89,4 +89,4 @@ class GenerateReconReport(BaseModel):
                 logger.debug(f"Sheet written for fund: {fund} ({group_df.shape[0]} rows).")
                 sheet_count += 1
 
-        logger.info(f"✅ Exported {sheet_count} fund sheets to Excel at: {output_file}")
+        logger.info(f"Exported {sheet_count} fund sheets to Excel at: {output_file}")
