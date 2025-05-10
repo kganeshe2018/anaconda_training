@@ -1,7 +1,6 @@
 import polars as pl
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from src.app.config import Config
 from src.base.base_model import BaseModel
 from src.helpers.db_utils import execute_query, write_df_to_sqlite, copy_data_from_src_to_tgt
 from src.helpers.logger import LoggerFactory
@@ -11,11 +10,11 @@ logger = LoggerFactory.get_logger(__name__)
 
 class PreprocessData(BaseModel):
 
-    def  __init__(self, app_config: Config):
+    def  __init__(self, app_config):
         super().__init__(app_config)
         self.config = app_config
-        self.db_path = Config.DB_PATH
-        self.funds_folder = Config.FUNDS_FOLDER
+        self.db_path = self.config.db_path
+        self.funds_folder = self.config.funds_folder
         self.tbl_raw = "tbl_raw_fund_position_details"
         self.reference_data_query_file_name = self.config.sql_query_get_raw_reference_data
 

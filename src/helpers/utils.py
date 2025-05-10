@@ -2,9 +2,6 @@ import re
 from datetime import datetime
 from typing import Optional
 from pathlib import Path
-
-from src.helpers.db_utils import execute_query
-from src.app.config import Config
 from src.helpers.logger import LoggerFactory
 
 logger = LoggerFactory.get_logger(__name__)

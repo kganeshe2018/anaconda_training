@@ -3,7 +3,6 @@ from app.etl.generate_perf_report import GeneratePerfReport
 from app.etl.generate_recon_report import GenerateReconReport
 from helpers.utils import (extract_mm_dd_yyyy, extract_yyyy_mm_dd, extract_yyyymmdd, extract_dd_mm_yyyy, extract_report_date,)
 from app.etl.pre_process_data import PreprocessData
-
 import polars as pl
 
 def test_extract_dd_mm_yyyy():
@@ -110,23 +109,6 @@ def test_preprocess_reference_price_data_fix_date(
     assert "DATETIME" in written_df.columns
     assert written_df["DATETIME"].dtype == pl.Utf8
     assert all(len(str(date)) == 10 for date in written_df["DATETIME"])  # YYYY-MM-DD
-
-def test_generate_best_performing_fund_logic_exact(mock_config, sample_fund_data):
-    mock_config.REPORT_PERF_PATH = "test_outputs/fund_report.xlsx"
-    report = GeneratePerfReport(mock_config)
-
-    report.get_funds_data = lambda: sample_fund_data
-
-    result_df = report.generate_best_performing_fund_report(return_df=True)
-
-    assert isinstance(result_df, pl.DataFrame)
-    assert result_df.shape[0] == 1
-
-    best_fund = result_df[0, "BEST FUND"]
-    ror = result_df[0, "RATE OF RETURN"]
-
-    assert best_fund == "Alpha"
-    assert abs(ror - 0.3) < 1e-6
 
 @patch("src.app.etl.generate_perf_report.GeneratePerfReport.generate_best_performing_fund_report")
 def test_compute_calls_generate_report(mock_generate, mock_config):

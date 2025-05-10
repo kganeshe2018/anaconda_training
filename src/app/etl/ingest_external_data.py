@@ -2,7 +2,7 @@ import re
 import sqlite3
 import polars as pl
 
-from src.app.config import Config
+from config.settings import AppConfig
 from src.base.base_model import BaseModel
 from src.helpers.db_utils import execute_query
 from src.helpers.logger import LoggerFactory
@@ -12,11 +12,11 @@ logger = LoggerFactory.get_logger(__name__)
 
 class IngestFundsData(BaseModel):
 
-    def  __init__(self, app_config: Config):
+    def  __init__(self, app_config: AppConfig):
         super().__init__(app_config)
         self.config = app_config
-        self.db_path = self.config.get_db_path()
-        self.funds_folder = self.config.get_funds_folder()
+        self.db_path = self.config.db_path
+        self.funds_folder = self.config.funds_folder
 
 
     def _compute(self) -> None:
@@ -27,7 +27,7 @@ class IngestFundsData(BaseModel):
         logger.info("Starting ingestion of fund CSVs...")
         col_fund_name = "FUND NAME"
         col_datetime = "DATETIME"
-        query_file_name = self.config.sql_query_get_active_funds
+        query_file_name = self.config.sql_query_get_active_funds_cfg
         try:
             sql = read_file_as_string(query_file_name)
             df = execute_query(self.config, sql.format(dte=self.config.data_date))

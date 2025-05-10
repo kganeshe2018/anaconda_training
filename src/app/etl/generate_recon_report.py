@@ -1,7 +1,8 @@
 from pathlib import Path
 import polars as pl
 import pandas as pd
-from src.app.config import Config
+
+from config.settings import AppConfig
 from src.base.base_model import BaseModel
 from src.helpers.db_utils import execute_query
 from src.helpers.logger import LoggerFactory
@@ -11,15 +12,15 @@ logger = LoggerFactory.get_logger(__name__)
 
 class GenerateReconReport(BaseModel):
 
-    def __init__(self, app_config: Config):
+    def __init__(self, app_config: AppConfig):
         super().__init__(app_config)
         self.config = app_config
-        self.db_path = Config.DB_PATH
-        self.funds_folder = Config.FUNDS_FOLDER
-        self.sql_path_pub_reference_data = Config.SQL_QUERY_GET_PUB_REFERENCE_DATA
-        self.sql_path_pub_funds_equities_data = Config.SQL_QUERY_GET_PUB_FUNDS_EQUITIES_DATA
-        self.report_recon_path = Config.REPORT_RECON_PATH
-        self.sql_path_active_funds_cfg = Config.SQL_QUERY_GET_ACTIVE_FUNDS_CFG
+        self.db_path = app_config.db_path
+        self.funds_folder = app_config.funds_folder
+        self.sql_path_pub_reference_data = app_config.sql_query_get_pub_reference_data
+        self.sql_path_pub_funds_equities_data = app_config.sql_query_get_pub_funds_equities_data
+        self.report_recon_path = app_config.report_recon_path
+        self.sql_path_active_funds_cfg = app_config.sql_query_get_active_funds_cfg
         self.col_fund_name = "FUND NAME"
 
     def _compute(self) -> None:

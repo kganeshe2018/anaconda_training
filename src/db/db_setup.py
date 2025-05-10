@@ -1,10 +1,7 @@
 import sqlite3
-import polars as pl
-
-from src.app.config import Config
 from src.base.base_model import BaseModel
 from src.helpers.logger import LoggerFactory
-from src.helpers.db_utils import execute_query
+from config.settings import AppConfig
 
 logger = LoggerFactory.get_logger("AppDB")
 
@@ -16,7 +13,7 @@ class SetupDB(BaseModel):
     setting up all necessary tables using SQL scripts.
     """
 
-    def __init__(self, app_config: Config):
+    def __init__(self, app_config: AppConfig):
         """
         Initialize the SetupDB class.
         
@@ -24,10 +21,11 @@ class SetupDB(BaseModel):
             app_config (Config): Application configuration object
         """
         super().__init__(app_config)
-        self.db_path = Config.DB_PATH
-        self.funds_folder = Config.FUNDS_FOLDER
-        self.sql_base_table_script_path = Config.SQL_QUERY_BASE_TABLES
-        self.sql_master_reference_script_path = Config.SQL_QUERY_MASTER_REFERENCE
+        self.config = app_config
+        self.db_path = self.config.db_path
+        self.funds_folder = self.config.funds_folder
+        self.sql_base_table_script_path = self.config.sql_query_base_tables
+        self.sql_master_reference_script_path = self.config.sql_query_master_reference
 
     def _compute(self) -> None:
         """

@@ -1,6 +1,5 @@
 import polars as pl
 from typing import Optional
-from src.app.config import Config
 from src.base.base_model import BaseModel
 from src.helpers.db_utils import execute_query
 from src.helpers.logger import LoggerFactory
@@ -11,15 +10,15 @@ logger = LoggerFactory.get_logger(__name__)
 
 class GeneratePerfReport(BaseModel):
 
-    def  __init__(self, app_config: Config):
+    def  __init__(self, app_config):
         super().__init__(app_config)
         self.config = app_config
-        self.db_path = self.config.get_db_path()
-        self.funds_folder = self.config.get_funds_folder()
-        self.sql_path_pub_reference_data = self.config.get_query_get_pub_reference_data()
-        self.sql_path_pub_funds_equities_data = self.config.get_query_get_pub_funds_equities_data()
-        self.report_perf_path = self.config.get_report_perf_path()
-        self.sql_path_active_funds_cfg = self.config.get_query_get_active_funds_cfg()
+        self.db_path = self.config.db_path
+        self.funds_folder = self.config.funds_folder
+        self.sql_path_pub_reference_data = self.config.sql_query_get_pub_reference_data
+        self.sql_path_pub_funds_equities_data = self.config.sql_query_get_pub_funds_equities_data
+        self.report_perf_path = self.config.report_perf_path
+        self.sql_path_active_funds_cfg = self.config.sql_query_get_active_funds_cfg
         self.col_fund_name = "FUND NAME"
 
         self.generate_best_performing_fund_report()

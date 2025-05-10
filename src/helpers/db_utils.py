@@ -2,7 +2,7 @@ import sqlite3
 from typing import Literal
 import polars as pl
 
-from src.app.config import Config
+from src.config.settings import AppConfig
 from src.helpers.logger import LoggerFactory
 
 __all__ = ["execute_query", "execute_non_query", "copy_data_from_src_to_tgt"]
@@ -10,8 +10,8 @@ __all__ = ["execute_query", "execute_non_query", "copy_data_from_src_to_tgt"]
 
 logger = LoggerFactory.get_logger(__name__)
 
-def execute_query(app_config: Config, query: str, params: tuple = ()) -> pl.DataFrame:
-    conn = sqlite3.connect(app_config.DB_PATH)
+def execute_query(app_config: AppConfig, query: str, params: tuple = ()) -> pl.DataFrame:
+    conn = sqlite3.connect(app_config.db_path)
     cursor = conn.cursor()
     cursor.execute(query, params)
     columns = [desc[0] for desc in cursor.description]
@@ -19,21 +19,21 @@ def execute_query(app_config: Config, query: str, params: tuple = ()) -> pl.Data
     conn.close()
     return pl.DataFrame(data, schema=columns,orient="row")
 
-def execute_non_query(app_config: Config,query: str, params: tuple = ()) -> None:
+def execute_non_query(app_config,query: str, params: tuple = ()) -> None:
     conn = sqlite3.connect(app_config.DB_PATH)
     cur = conn.cursor()
     cur.execute(query, params)
     conn.commit()
     conn.close()
 
-def write_df_to_sqlite(app_config: Config,df: pl.DataFrame, table_name: str, if_exists: str = "replace"):
+def write_df_to_sqlite(app_config,df: pl.DataFrame, table_name: str, if_exists: str = "replace"):
     if df.is_empty():
         raise ValueError("DataFrame is empty. Nothing to write.")
 
     if not table_name:
         raise ValueError("Table name must be provided.")
 
-    conn = sqlite3.connect(app_config.DB_PATH)
+    conn = sqlite3.connect(app_config.db_path)
     try:
         # Truncate table contents
         conn.execute(f"DELETE FROM {table_name};")
@@ -45,7 +45,7 @@ def write_df_to_sqlite(app_config: Config,df: pl.DataFrame, table_name: str, if_
         conn.close()
 
 def copy_data_from_src_to_tgt(
-    app_config: Config,
+    app_config,
     staging_table: str,
     publish_table: str,
     mode: Literal["replace", "append"] = "replace"
@@ -57,8 +57,9 @@ def copy_data_from_src_to_tgt(
         staging_table (str): Name of the staging table to read from.
         publish_table (str): Name of the publish table to write to.
         mode (str): 'replace' to truncate and load, 'append' to add to existing data.
+
     """
-    conn = sqlite3.connect(app_config.DB_PATH)
+    conn = sqlite3.connect(app_config.db_path)
     try:
         # Step 1: Read from staging
         df = pl.read_database(f"SELECT * FROM {staging_table}", conn, infer_schema_length=10000000)

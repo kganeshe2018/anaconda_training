@@ -1,6 +1,7 @@
 from src.helpers.logger import LoggerFactory
-from src.app.config import Config
 logger = LoggerFactory.get_logger(__name__)
+from src.config.settings import AppConfig
+from src.helpers.logger import LoggerFactory
 
 class BaseModel:
     """
@@ -10,7 +11,7 @@ class BaseModel:
     ensuring consistency in how they're initialized and executed.
     """
     
-    def __init__(self, app_config: Config):
+    def __init__(self, app_config: AppConfig):
         """
         Initialize the base model with configuration.
         
