@@ -5,7 +5,7 @@ SELECT main.DATETIME AS DATETIME,
        LKP.SECTOR AS "SECTOR",
        LKP.INDUSTRY AS "INDUSTRY",
        LKP.CURRENCY AS "CURRENCY"
-       FROM tbl_stg_equity_prices main
+       FROM tbl_pub_equity_prices main
 left join equity_reference lkp on
 main.SYMBOL=lkp.SYMBOL
 ORDER BY DATETIME,SYMBOL

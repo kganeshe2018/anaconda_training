@@ -8,7 +8,7 @@ SELECT main.DATETIME AS DATETIME,
        MAIN."REALISED P/L" as "REALISED P/L",
        MAIN."MARKET VALUE" as "MARKET VALUE",
        MAIN."QUANTITY" as "QUANTITY"
-       FROM tbl_raw_fund_position_details main
+       FROM tbl_pub_fund_position_details main
                   INNER JOIN tbl_cfg_fund_config lkp on
     MAIN."FUND NAME"=lkp."FUND NAME"
         AND main."FINANCIAL TYPE"='Equities'

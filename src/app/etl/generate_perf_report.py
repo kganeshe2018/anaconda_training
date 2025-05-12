@@ -21,6 +21,7 @@ class GeneratePerfReport(BaseModel):
         self.sql_path_active_funds_cfg = self.config.sql_query_get_active_funds_cfg
         self.col_fund_name = "FUND NAME"
 
+    def _compute(self) -> None:
         self.generate_best_performing_fund_report()
 
 

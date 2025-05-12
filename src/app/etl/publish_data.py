@@ -28,7 +28,7 @@ class PublishData(BaseModel):
 
         #Publish Equity Reference
         logger.info("Starting publish of Equity Reference...")
-        copy_data_from_src_to_tgt(self.config, "tbl_stg_equity_reference", "tbl_stg_equity_reference")
+        copy_data_from_src_to_tgt(self.config, "tbl_stg_equity_reference", "tbl_pub_equity_reference")
         logger.info("Completed publish of Equity Reference...")
         pass
 
