@@ -177,5 +177,5 @@ def test_publish_reference_data(mock_copy, mock_config):
 
     assert mock_copy.call_count == 2
     mock_copy.assert_any_call(mock_config, "tbl_stg_equity_prices", "tbl_pub_equity_prices")
-    mock_copy.assert_any_call(mock_config, "tbl_stg_equity_reference", "tbl_stg_equity_reference")
+    mock_copy.assert_any_call(mock_config, "tbl_stg_equity_reference", "tbl_pub_equity_reference")
 
