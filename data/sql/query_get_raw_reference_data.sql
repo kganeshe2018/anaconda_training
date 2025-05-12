@@ -1,0 +1,1 @@
+SELECT * FROM equity_prices
