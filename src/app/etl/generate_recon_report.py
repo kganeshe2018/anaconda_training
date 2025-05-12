@@ -11,8 +11,21 @@ from src.helpers.utils import read_file_as_string
 logger = LoggerFactory.get_logger(__name__)
 
 class GenerateReconReport(BaseModel):
+    """
+    Class for generating reconciliation reports between fund data and reference data.
+
+    This class compares fund position data with reference data to identify discrepancies
+    in prices. It generates an Excel report with separate sheets for each fund, showing
+    the joined data and highlighting price differences.
+    """
 
     def __init__(self, app_config: AppConfig):
+        """
+        Initialize the GenerateReconReport class.
+
+        Args:
+            app_config (AppConfig): Application configuration object containing paths and settings
+        """
         super().__init__(app_config)
         self.config = app_config
         self.db_path = app_config.db_path
@@ -24,11 +37,29 @@ class GenerateReconReport(BaseModel):
         self.col_fund_name = "FUND NAME"
 
     def _compute(self) -> None:
+        """
+        Execute the reconciliation report generation process.
+
+        This method is called by the BaseModel's run method and serves as the main
+        entry point for the report generation process.
+
+        Returns:
+            None
+        """
         logger.info("Starting reconciliation report generation...")
         self.export_filtered_joins_to_excel_polars()
         logger.info("Reconciliation report generation completed.")
 
     def get_reference_data(self) -> pl.DataFrame:
+        """
+        Retrieve reference data from the database.
+
+        Executes a SQL query to fetch reference price data from the published tables,
+        using the configured SQL query file.
+
+        Returns:
+            pl.DataFrame: DataFrame containing reference price data
+        """
         logger.info("Loading reference data...")
         sql = read_file_as_string(file_path=self.sql_path_pub_reference_data)
         logger.debug(f"Reference SQL:\n{sql}")
@@ -37,6 +68,15 @@ class GenerateReconReport(BaseModel):
         return df
 
     def get_funds_data(self) -> pl.DataFrame:
+        """
+        Retrieve fund data from the database.
+
+        Executes a SQL query to fetch fund equity data from the published tables,
+        using the configured SQL query file and data date.
+
+        Returns:
+            pl.DataFrame: DataFrame containing fund equity data
+        """
         logger.info("Loading fund equities data...")
         sql = read_file_as_string(file_path=self.sql_path_pub_funds_equities_data).format(dte=self.config.data_date)
         logger.debug(f"Funds SQL:\n{sql}")
@@ -45,6 +85,15 @@ class GenerateReconReport(BaseModel):
         return df
 
     def get_active_funds_cfg(self) -> pl.DataFrame:
+        """
+        Retrieve active funds configuration from the database.
+
+        Executes a SQL query to fetch the list of active funds that should be included
+        in the reconciliation report, using the configured SQL query file and data date.
+
+        Returns:
+            pl.DataFrame: DataFrame containing active funds configuration
+        """
         logger.info("Loading active funds configuration...")
         sql = read_file_as_string(file_path=self.sql_path_active_funds_cfg).format(dte=self.config.data_date)
         logger.debug(f"Active funds SQL:\n{sql}")
@@ -53,6 +102,16 @@ class GenerateReconReport(BaseModel):
         return df
 
     def export_filtered_joins_to_excel_polars(self):
+        """
+        Generate and export the reconciliation report to Excel.
+
+        This method retrieves fund data and reference data, joins them on date and symbol,
+        calculates price differences, and exports the results to an Excel file with
+        separate sheets for each active fund.
+
+        Returns:
+            None
+        """
         logger.info("Starting export of fund-level joined data to Excel...")
 
         main_df = self.get_funds_data()

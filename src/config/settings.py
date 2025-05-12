@@ -5,6 +5,14 @@ from pydantic_settings import BaseSettings
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class AppConfig(BaseSettings):
+    """
+    Application configuration class that loads and validates settings from environment variables.
+
+    This class uses Pydantic's BaseSettings to load configuration from environment variables
+    and validate their types. It defines paths to various resources used by the application,
+    such as database files, input/output folders, and SQL query files.
+    """
+
     data_date: str = Field(..., validation_alias="DATA_DATE")
     db_path: Path = Field(..., validation_alias="DB_PATH")
     funds_folder: Path = Field(..., validation_alias="FUNDS_FOLDER")
@@ -21,6 +29,15 @@ class AppConfig(BaseSettings):
     sql_query_get_pub_funds_equities_data: Path = Field(..., validation_alias="SQL_QUERY_GET_PUB_FUNDS_EQUITIES_DATA")
 
     def __init__(self, **kwargs):
+        """
+        Initialize the AppConfig with settings from environment variables.
+
+        This constructor initializes the configuration object and converts all relative paths
+        to absolute paths by joining them with the project's base directory.
+
+        Args:
+            **kwargs: Additional keyword arguments to pass to the parent class constructor
+        """
         super().__init__(**kwargs)
         self.db_path = BASE_DIR / self.db_path
         self.funds_folder = BASE_DIR / self.funds_folder

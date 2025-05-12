@@ -11,19 +11,49 @@ from src.helpers.utils import extract_report_date, get_files_in_directory, read_
 logger = LoggerFactory.get_logger(__name__)
 
 class IngestFundsData(BaseModel):
+    """
+    Class for ingesting fund data from external CSV files.
 
-    def  __init__(self, app_config: AppConfig):
+    This class reads fund position data from CSV files in a specified directory,
+    extracts the report date from the filename, and loads the data into the raw
+    fund position details table in the database.
+    """
+
+    def __init__(self, app_config: AppConfig):
+        """
+        Initialize the IngestFundsData class.
+
+        Args:
+            app_config (AppConfig): Application configuration object containing paths and settings
+        """
         super().__init__(app_config)
         self.config = app_config
         self.db_path = self.config.db_path
         self.funds_folder = self.config.funds_folder
 
-
     def _compute(self) -> None:
+        """
+        Execute the fund data ingestion process.
+
+        This method is called by the BaseModel's run method and serves as the main
+        entry point for the data ingestion process.
+
+        Returns:
+            None
+        """
         self.ingest()
 
-
     def ingest(self):
+        """
+        Ingest fund data from CSV files into the database.
+
+        This method reads CSV files from the configured funds folder, filters them based on
+        active fund names, extracts the report date from the filename, and loads the data
+        into the raw fund position details table in the database.
+
+        Returns:
+            None
+        """
         logger.info("Starting ingestion of fund CSVs...")
         col_fund_name = "FUND NAME"
         col_datetime = "DATETIME"
@@ -65,4 +95,3 @@ class IngestFundsData(BaseModel):
         except Exception as e:
             logger.error(f"Error in extract_fund_name_from_filename: {e}")
             return None
-

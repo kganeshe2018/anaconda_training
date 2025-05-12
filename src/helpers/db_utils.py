@@ -11,6 +11,17 @@ __all__ = ["execute_query", "execute_non_query", "copy_data_from_src_to_tgt"]
 logger = LoggerFactory.get_logger(__name__)
 
 def execute_query(app_config: AppConfig, query: str, params: tuple = ()) -> pl.DataFrame:
+    """
+    Execute a SQL query and return the results as a Polars DataFrame.
+
+    Args:
+        app_config (AppConfig): Application configuration object containing database path
+        query (str): SQL query to execute
+        params (tuple, optional): Parameters to substitute into the query. Defaults to ().
+
+    Returns:
+        pl.DataFrame: Results of the query as a Polars DataFrame
+    """
     conn = sqlite3.connect(app_config.db_path)
     cursor = conn.cursor()
     cursor.execute(query, params)
@@ -19,14 +30,40 @@ def execute_query(app_config: AppConfig, query: str, params: tuple = ()) -> pl.D
     conn.close()
     return pl.DataFrame(data, schema=columns,orient="row")
 
-def execute_non_query(app_config,query: str, params: tuple = ()) -> None:
+def execute_non_query(app_config: AppConfig, query: str, params: tuple = ()) -> None:
+    """
+    Execute a SQL query that doesn't return results (e.g., INSERT, UPDATE, DELETE).
+
+    Args:
+        app_config (AppConfig): Application configuration object containing database path
+        query (str): SQL query to execute
+        params (tuple, optional): Parameters to substitute into the query. Defaults to ().
+
+    Returns:
+        None
+    """
     conn = sqlite3.connect(app_config.DB_PATH)
     cur = conn.cursor()
     cur.execute(query, params)
     conn.commit()
     conn.close()
 
-def write_df_to_sqlite(app_config,df: pl.DataFrame, table_name: str, if_exists: str = "replace"):
+def write_df_to_sqlite(app_config: AppConfig, df: pl.DataFrame, table_name: str, if_exists: str = "replace"):
+    """
+    Write a Polars DataFrame to a SQLite table.
+
+    This function truncates the existing table contents and then writes the DataFrame data.
+
+    Args:
+        app_config (AppConfig): Application configuration object containing database path
+        df (pl.DataFrame): Polars DataFrame to write to the database
+        table_name (str): Name of the table to write to
+        if_exists (str, optional): Action to take if the table exists. Defaults to "replace".
+            Currently only "replace" is supported, which truncates the table before writing.
+
+    Raises:
+        ValueError: If the DataFrame is empty or if no table name is provided
+    """
     if df.is_empty():
         raise ValueError("DataFrame is empty. Nothing to write.")
 

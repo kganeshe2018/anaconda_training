@@ -9,8 +9,20 @@ from src.helpers.utils import read_file_as_string
 logger = LoggerFactory.get_logger(__name__)
 
 class GeneratePerfReport(BaseModel):
+    """
+    Class for generating performance reports for funds.
 
-    def  __init__(self, app_config):
+    This class analyzes fund data to identify the best performing funds for each month
+    based on rate of return calculations. It generates an Excel report with the results.
+    """
+
+    def __init__(self, app_config):
+        """
+        Initialize the GeneratePerfReport class.
+
+        Args:
+            app_config (AppConfig): Application configuration object containing paths and settings
+        """
         super().__init__(app_config)
         self.config = app_config
         self.db_path = self.config.db_path
@@ -22,10 +34,27 @@ class GeneratePerfReport(BaseModel):
         self.col_fund_name = "FUND NAME"
 
     def _compute(self) -> None:
+        """
+        Execute the performance report generation process.
+
+        This method is called by the BaseModel's run method and serves as the main
+        entry point for the report generation process.
+
+        Returns:
+            None
+        """
         self.generate_best_performing_fund_report()
 
-
     def get_funds_data(self) -> pl.DataFrame:
+        """
+        Retrieve fund data from the database.
+
+        Executes a SQL query to fetch fund equity data from the published tables,
+        using the configured SQL query file and data date.
+
+        Returns:
+            pl.DataFrame: DataFrame containing fund equity data
+        """
         sql = read_file_as_string(file_path=self.sql_path_pub_funds_equities_data).format(dte=self.config.data_date)
         logger.debug(sql)
         df = execute_query(self.config, sql)
@@ -37,8 +66,25 @@ class GeneratePerfReport(BaseModel):
             fund_col: str = "FUND NAME",
             mv_col: str = "MARKET VALUE",
             pl_col: str = "REALISED P/L",
-            return_df: bool = False  #
+            return_df: bool = False
     ) -> Optional[pl.DataFrame]:
+        """
+        Generate a report of the best performing funds for each month.
+
+        This method calculates the rate of return for each fund in each month by comparing
+        the start and end market values and adding realized profit/loss. It then identifies
+        the best performing fund for each month and exports the results to an Excel file.
+
+        Args:
+            date_col (str, optional): Name of the date column. Defaults to "DATETIME".
+            fund_col (str, optional): Name of the fund name column. Defaults to "FUND NAME".
+            mv_col (str, optional): Name of the market value column. Defaults to "MARKET VALUE".
+            pl_col (str, optional): Name of the profit/loss column. Defaults to "REALISED P/L".
+            return_df (bool, optional): Whether to return the results DataFrame. Defaults to False.
+
+        Returns:
+            Optional[pl.DataFrame]: DataFrame of best performing funds if return_df is True, None otherwise
+        """
         df = self.get_funds_data()
         output_file= self.report_perf_path
 
